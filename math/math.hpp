@@ -1,22 +1,33 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <bitset>
 #include <cmath>
+#include <concepts>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <numeric>
+#include <ranges>
 #include <set>
 #include <span>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+
 using u64 = uint64_t;
 using s64 = int64_t;
+template <typename Range>
+concept RandAccessRange = std::ranges::random_access_range<Range>;
+
+template <typename Iter>
+concept BidirectionalIterator = std::bidirectional_iterator<Iter>;
 
 inline std::vector<u64> prime_factors(u64 n) {
     std::vector<u64> factors;
@@ -40,8 +51,9 @@ inline std::vector<u64> prime_factors(u64 n) {
     return factors;
 }
 
-// skull emoji
-inline int next_prime(int cur_num) {
+// i made this function up, its terrible
+template <std::integral T>
+constexpr T next_prime(T cur_num) {
     if (cur_num == 2) {
         return 3;
     }
@@ -50,13 +62,13 @@ inline int next_prime(int cur_num) {
         return 5;
     }
 
-    int next_num = cur_num + 2;
+    T next_num = cur_num + 2;
     bool is_prime = false;
 
     while (!is_prime) {
         is_prime = true;
-        int next_num_sqrt = std::sqrt(next_num);
-        for (int i = 2; i <= next_num_sqrt; i++) {
+        T next_num_sqrt = std::sqrt(next_num);
+        for (T i = 2; i <= next_num_sqrt; i++) {
             if (next_num % i == 0) {
                 is_prime = false;
                 break;
@@ -85,7 +97,7 @@ inline auto arithmetic_derivative(u64 n) -> u64 {
 };
 
 // https://en.wikipedia.org/wiki/M%C3%B6bius_function
-inline int mobius(int n) {
+inline u64 mobius(u64 n) {
     std::vector<u64> factors = prime_factors(n);
     std::set<u64> unique_factors(factors.begin(), factors.end());
 
@@ -94,4 +106,66 @@ inline int mobius(int n) {
     }
 
     return (factors.size() % 2 == 0) ? 1 : -1;
+}
+
+// self explanatory
+template <std::integral T>
+constexpr T factorial(T n) {
+    T result = 1;
+    for (T i = 2; i <= n; ++i) {
+        result *= i;
+    }
+    return result;
+}
+
+// Function to compute the lexicographic index of a permutation
+template <std::forward_iterator It, std::sentinel_for<It> S>
+    requires(std::totally_ordered<std::iter_reference_t<It>>)
+constexpr u64 lexicographic_index(It first, S last) {
+    u64 result = 0;
+    auto n = std::ranges::distance(first, last);  // Get the size of the range
+
+    for (const auto it : std::views::iota(first, last)) {
+        // Count how many elements after *j are smaller than *j
+        auto k = std::count_if(std::ranges::next(it), last, [&](const auto& val) {
+            return val < *it;
+        });
+
+        result += k * factorial(n - std::ranges::distance(first, it) - 1);  // Add k * factorial of remaining elements
+    }
+
+    return result;
+}
+
+template <std::ranges::forward_range Rng>
+    requires(std::totally_ordered<std::ranges::range_reference_t<Rng>>)
+constexpr auto lexicographic_index(Rng&& rng) {
+    return lexicographic_index(std::ranges::begin(rng), std::ranges::end(rng));
+}
+
+
+// Function to calculate the Lehmer code for a range of elements
+template <std::forward_iterator It, std::sentinel_for<It> S>
+    requires(std::totally_ordered<std::iter_reference_t<It>>)
+constexpr auto lehmer_code(It first, S last) {
+    std::vector<std::iter_difference_t<It>> lehmer;
+
+    for (const auto it : std::views::iota(first, last)) {
+        const auto count = std::ranges::count_if(
+            std::ranges::next(it), last,
+
+            [&](const auto& val) {
+                return val < *it;
+            });
+
+        lehmer.push_back(count);
+    }
+
+    return lehmer;
+}
+
+template <std::ranges::forward_range Rng>
+    requires(std::totally_ordered<std::ranges::range_reference_t<Rng>>)
+constexpr auto lehmer_code(Rng&& rng) {
+    return lehmer_code(std::ranges::begin(rng), std::ranges::end(rng));
 }
