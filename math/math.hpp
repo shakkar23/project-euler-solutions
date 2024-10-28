@@ -6,6 +6,7 @@
 #include <cmath>
 #include <concepts>
 #include <cstdlib>
+#include <cstdint>
 #include <cstring>
 #include <fstream>
 #include <iomanip>
@@ -20,9 +21,9 @@
 #include <unordered_map>
 #include <vector>
 
-
 using u64 = uint64_t;
 using s64 = int64_t;
+
 template <typename Range>
 concept RandAccessRange = std::ranges::random_access_range<Range>;
 
@@ -51,9 +52,33 @@ inline std::vector<u64> prime_factors(u64 n) {
     return factors;
 }
 
+inline std::array<u64, 64> prime_factors_static(u64 n) {
+    std::array<u64, 64> factors;
+    factors.fill(1);
+
+    u64 i = 2;
+    u64 j = 0;
+
+    while (i * i <= n) {
+        if (n % i == 0) {
+            factors[j] = i;
+            n /= i;
+            j++;
+        } else {
+            i++;
+        }
+    }
+
+    if (n > 1) {
+        factors[j] = n;
+    }
+
+    return factors;
+}
+
 // i made this function up, its terrible
 template <std::integral T>
-constexpr T next_prime(T cur_num) {
+constexpr inline T next_prime(T cur_num) {
     if (cur_num == 2) {
         return 3;
     }
@@ -110,7 +135,7 @@ inline u64 mobius(u64 n) {
 
 // self explanatory
 template <std::integral T>
-constexpr T factorial(T n) {
+constexpr inline T factorial(T n) {
     T result = 1;
     for (T i = 2; i <= n; ++i) {
         result *= i;
@@ -121,7 +146,7 @@ constexpr T factorial(T n) {
 // Function to compute the lexicographic index of a permutation
 template <std::forward_iterator It, std::sentinel_for<It> S>
     requires(std::totally_ordered<std::iter_reference_t<It>>)
-constexpr u64 lexicographic_index(It first, S last) {
+constexpr inline u64 lexicographic_index(It first, S last) {
     u64 result = 0;
     auto n = std::ranges::distance(first, last);  // Get the size of the range
 
@@ -131,7 +156,8 @@ constexpr u64 lexicographic_index(It first, S last) {
             return val < *it;
         });
 
-        result += k * factorial(n - std::ranges::distance(first, it) - 1);  // Add k * factorial of remaining elements
+        // Add k * factorial of remaining elements
+        result += k * factorial(n - std::ranges::distance(first, it) - 1);  
     }
 
     return result;
@@ -139,15 +165,14 @@ constexpr u64 lexicographic_index(It first, S last) {
 
 template <std::ranges::forward_range Rng>
     requires(std::totally_ordered<std::ranges::range_reference_t<Rng>>)
-constexpr auto lexicographic_index(Rng&& rng) {
+constexpr inline auto lexicographic_index(Rng&& rng) {
     return lexicographic_index(std::ranges::begin(rng), std::ranges::end(rng));
 }
-
 
 // Function to calculate the Lehmer code for a range of elements
 template <std::forward_iterator It, std::sentinel_for<It> S>
     requires(std::totally_ordered<std::iter_reference_t<It>>)
-constexpr auto lehmer_code(It first, S last) {
+constexpr inline auto lehmer_code(It first, S last) {
     std::vector<std::iter_difference_t<It>> lehmer;
 
     for (const auto it : std::views::iota(first, last)) {
@@ -166,6 +191,25 @@ constexpr auto lehmer_code(It first, S last) {
 
 template <std::ranges::forward_range Rng>
     requires(std::totally_ordered<std::ranges::range_reference_t<Rng>>)
-constexpr auto lehmer_code(Rng&& rng) {
+constexpr inline auto lehmer_code(Rng&& rng) {
     return lehmer_code(std::ranges::begin(rng), std::ranges::end(rng));
+}
+
+inline bool is_palindrome(u64 n) {
+    std::string str = std::to_string(n);
+    return std::equal(str.begin(), str.begin() + str.size() / 2, str.rbegin());
+}
+
+inline u64 pow_mod(u64 base, u64 exp, u64 mod) {
+    u64 ret = 1;
+
+    while (exp > 0) {
+        if (exp % 2 == 1)
+            ret = (ret * base) % mod;
+        // square when possible which should limit the number of operations by a lot
+        base = (base * base) % mod;
+        exp = exp / 2;
+    }
+
+    return ret;
 }

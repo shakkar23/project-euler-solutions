@@ -6,7 +6,7 @@
     Prime power triples
     Problem 87
 */
-inline int prime_power_triples() {
+inline int problem_87() {
     std::unique_ptr<std::bitset<50'000'000>> bits = std::make_unique<std::bitset<50'000'000>>(0);
 
     auto calc = [](int sq, int cu, int te) -> int {

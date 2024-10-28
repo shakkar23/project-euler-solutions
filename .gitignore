@@ -1,3 +1,6 @@
 .vscode/
 .venv/
 build/
+generated/all_problems.hpp
+generated/all_problems.cpp
+

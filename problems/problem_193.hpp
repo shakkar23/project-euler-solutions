@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../math/math.hpp"
+#include <chrono>
 
 template <std::size_t N>
-std::vector<u64> get_primes() {
+constexpr std::vector<u64> get_primes() {
     std::vector<u64> res;  
     auto seive = std::make_unique<std::bitset<N+1>>(0);
 
@@ -28,12 +29,31 @@ std::vector<u64> get_primes() {
 
 // Squarefree Numbers
 inline u64 problem_193() {
-    u64 ret = 0;
+    constexpr u64 big = 1ull << 50;
+    constexpr u64 sqrt_big = 1ull << 25;
+    auto big_primes = get_primes<sqrt_big>();
+    std::reverse(big_primes.begin(), big_primes.end());
+    std::cout << "finished generating primes under sqrt big" << std::endl;
+    u64 count = 0;
 
-    auto primes = get_primes<33'554'432>();
+    for (const u64 &prime_i : big_primes) {  // 2.6mil
+        for (u64 large = prime_i * prime_i; large < big; large += prime_i * prime_i) {
+            const auto primes = prime_factors_static(large);
+            u64 first = primes[0];
+            bool colliding = false;
 
-    std::cout << primes.size() << " ";
+            for (int pi = 1; pi < primes.size(); ++pi) {
+                u64 second = primes[pi];
 
-    return 555;
-
+                // check if this number is squareful (opposite of square free)
+                // only care about the outcome if the squareful number is larger than the
+                colliding |= (first == second) & (first > prime_i);
+                first = second;
+            }
+            count += !colliding;
+        }
+        std::cout << "finished: " << prime_i << std::endl;
+    }
+    std::cout << "\n\n";
+    return count;
 }
