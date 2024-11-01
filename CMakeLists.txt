@@ -5,20 +5,18 @@ project(HelloWorld)
 
 set(CMAKE_CXX_STANDARD 23)
 
+# find all the files in the problems directory
+file(GLOB_RECURSE problems_headers "problems/*.hpp")
 
 # create a header file for the main file that includes all the files in the problems directory
 file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/generated/all_problems.hpp)
 file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/generated/all_problems.hpp "#pragma once\n")
-file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/generated/all_problems.hpp "void all_problems();\n")
-
-# make sure to delete the file if it already exists
-file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/generated/all_problems.cpp)
-file(GLOB_RECURSE problems_headers "problems/*.cpp")
 foreach(header ${problems_headers})
-    file(APPEND ${CMAKE_CURRENT_SOURCE_DIR}/generated/all_problems.cpp "#include \"${header}\"\n")
+    file(APPEND ${CMAKE_CURRENT_SOURCE_DIR}/generated/all_problems.hpp "#include \"${header}\"\n")
 endforeach()
+file(APPEND ${CMAKE_CURRENT_SOURCE_DIR}/generated/all_problems.hpp "void all_problems();\n")
 
-#generate a header file that calls every problem, each problem function being labeled at "problem_#()"
+#generate a cpp file that calls every problem, each problem function being labeled at "problem_#()"
 file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/generated/all_problems.cpp)
 file(APPEND ${CMAKE_CURRENT_SOURCE_DIR}/generated/all_problems.cpp "#include \"all_problems.hpp\"\n")
 file(APPEND ${CMAKE_CURRENT_SOURCE_DIR}/generated/all_problems.cpp "#include <iostream>\n\n")
