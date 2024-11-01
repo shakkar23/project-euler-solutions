@@ -1,4 +1,4 @@
 FROM archlinux:base
 
-RUN pacman -Syu && pacman -S --noconfirm clang gcc
+RUN pacman -Syu && pacman -S --noconfirm clang gcc cmake
 
