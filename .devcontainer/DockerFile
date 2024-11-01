@@ -1,4 +1,0 @@
-FROM archlinux:base
-
-RUN yay -S clang && yay -S cmake
-
