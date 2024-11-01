@@ -1,4 +1,5 @@
 #include <map>
+#include <chrono>
 
 #include "math/math.hpp"
 
@@ -13,10 +14,13 @@
 #define STRDEEP(n) STR(n)
 
 int main(const int argc, const char *const argv[]) {
-#ifdef INCLUE
+#ifdef INCLUDE
+    auto start = std::chrono::steady_clock::now();
     std::cout << STRDEEP(PROBLEM) << ": " << PROBLEM() << std::endl;
+    auto end = std::chrono::steady_clock::now();
+    std::cout << "Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0 << "s" << std::endl;
 #else
-;
+    all_problems();
 #endif
     // std::cout << "Problem 1: " << problem_1() << std::endl;
     // std::cout << "Problem 2: " << problem_2() << std::endl;
