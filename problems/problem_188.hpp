@@ -4,13 +4,13 @@
 
 
 
-u64 problem_188() {
+inline u64 problem_188() {
     constexpr u64 num = 1777;
 
-    u64 rep = 1'0000'0000;
+    u64 rep = 100'000'0000;
     std::vector<u64> exp_mods{rep};
 
-    // find the repitiions to limit the number of times that i have to loop in the final loop 
+    // find the rpttns to limit the number of times that i have to loop in the final loop 
     // as in this example the final mod == 1 which nullifies all higher powers
     u64 iter = 0;
     u64 base = num;
@@ -21,7 +21,7 @@ u64 problem_188() {
             base *= num;
             base %= rep;
             if (base == orig_base) {
-                //std::cout << iter << std::endl;
+                std::cout << iter << std::endl;
                 exp_mods.emplace_back(iter);
                 rep = iter;
                 base = num % rep;
